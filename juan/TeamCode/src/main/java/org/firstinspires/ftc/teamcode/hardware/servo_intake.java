@@ -3,15 +3,15 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class servo_plug {
+public class servo_intake {
     public Servo servo = null;
 
-    public static double SERVO_DOWN = 0.63;
+    public static double SERVO_DOWN = 0.16;
 
-    public static double SERVO_UP = 0.13;
+    public static double SERVO_UP = 0.58;
 
-    public servo_plug(HardwareMap hwMap) {
-        servo = hwMap.get(Servo.class, "servoPlug");
+    public servo_intake(HardwareMap hwMap) {
+        servo = hwMap.get(Servo.class, "servoIntake");
         up();
     }
 

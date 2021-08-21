@@ -4,91 +4,27 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.Angle;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.util.Range;
-import org.firstinspires.ftc.teamcode.hardware.init_robot;
-import org.firstinspires.ftc.teamcode.hardware.servo_outtake1;
-import org.firstinspires.ftc.teamcode.hardware.servo_outtake2;
-import org.firstinspires.ftc.teamcode.hardware.servo_wobble1;
-import org.firstinspires.ftc.teamcode.hardware.servo_wobble2;
-import org.firstinspires.ftc.teamcode.hardware.servo_glisiera;
-
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-
-import java.util.Arrays;
-import java.util.List;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.hardware.init_robot;
+import org.firstinspires.ftc.teamcode.hardware.servo_glisiera;
 import org.firstinspires.ftc.teamcode.hardware.servo_outtake1;
 import org.firstinspires.ftc.teamcode.hardware.servo_outtake2;
-import org.firstinspires.ftc.teamcode.hardware.servo_glisiera;
+import org.firstinspires.ftc.teamcode.hardware.servo_plug;
 import org.firstinspires.ftc.teamcode.hardware.servo_wobble1;
 import org.firstinspires.ftc.teamcode.hardware.servo_wobble2;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-
-import org.firstinspires.ftc.teamcode.teleop.augmentedDrive.SampleMecanumDriveCancelable;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 
 import static java.lang.Boolean.FALSE;
 
 
 @TeleOp
+@Disabled
 public class driveAlbastru extends LinearOpMode {
 
 
@@ -100,11 +36,12 @@ public class driveAlbastru extends LinearOpMode {
     Boolean cont_glisiera = FALSE;
 
 
-    public static double NEW_P = 38;
-    public static double NEW_I = 14;
-    public static double NEW_D = 20;
-    public double HIGH_VELO = 1480;
-    public double POWERSHOT_VELO = 1320;
+    public static double NEW_P = 65;
+    public static double NEW_I = 3.75;
+    public static double NEW_D = 0;
+    public static double NEW_F = 16.4;
+    public double HIGH_VELO = 1560;
+    public double POWERSHOT_VELO = 1280;
 
     // Define 2 states, drive control or automatic control
     enum Mode {
@@ -132,9 +69,14 @@ public class driveAlbastru extends LinearOpMode {
 
         DcMotorEx outtake = null; // Intake motor
         outtake = (DcMotorEx)hardwareMap.get(DcMotor.class, "outtake");
-        PIDCoefficients pidOrig = outtake.getPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIDCoefficients pidNew = new PIDCoefficients(NEW_P, NEW_I, NEW_D);
-        outtake.setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidNew);
+
+        PIDFCoefficients pidOrig = outtake.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // change coefficients using methods included with DcMotorEx class.
+        PIDFCoefficients pidNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
+        outtake.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidNew);
+
+        // re-read coefficients and verify change.
         PIDCoefficients pidModified = outtake.getPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
@@ -153,9 +95,11 @@ public class driveAlbastru extends LinearOpMode {
         servo_wobble1 wob_brat = new servo_wobble1(hardwareMap);
         servo_wobble2 wob_cleste = new servo_wobble2(hardwareMap);
         servo_glisiera outg = new servo_glisiera(hardwareMap);
+        servo_plug plug = new servo_plug(hardwareMap);
+        plug.up();
         out1.open();
         out2.open();
-        outg.open();
+        outg.close();
         wob_brat.mid();
         wob_cleste.close();
 
@@ -199,7 +143,7 @@ public class driveAlbastru extends LinearOpMode {
                     if (gamepad1.right_bumper) {
                         targetAngle = Math.atan2(-poseEstimate.getY() + towerVector.getY(), -poseEstimate.getX() + towerVector.getX());
 
-                        drive.turnAsync(Angle.normDelta(targetAngle - poseEstimate.getHeading()) + 3.1415);
+                        drive.turnAsync(Angle.normDelta(targetAngle - poseEstimate.getHeading()) + 3.1416);
 
                         currentMode = Mode.AUTOMATIC_CONTROL;
                     }
@@ -211,18 +155,18 @@ public class driveAlbastru extends LinearOpMode {
                         DcMotorEx finalOuttake = outtake;
 
                         Trajectory trajectory1 = drive.trajectoryBuilder(new Pose2d(63.5, 0, 3.1415))
-                                .strafeTo(new Vector2d(56.5, -41.2))
+                                .strafeTo(new Vector2d(56.5, -48.75))
                                 .addTemporalMarker(0.15, () -> {
                                     finalOuttake.setVelocity(POWERSHOT_VELO);
                                 })
                                 .build();
 
                         Trajectory trajectory2 = drive.trajectoryBuilder(trajectory1.end())
-                                .strafeTo(new Vector2d(56.5, -48.75))
+                                .strafeTo(new Vector2d(56.5, -55))
                                 .build();
 
                         Trajectory trajectory3 = drive.trajectoryBuilder(trajectory2.end())
-                                .strafeTo(new Vector2d(56.5, -56))
+                                .strafeTo(new Vector2d(56.5, -64))
                                 .build();
 
                         drive.followTrajectory(trajectory1);
@@ -231,14 +175,14 @@ public class driveAlbastru extends LinearOpMode {
                         sleep(250);
                         outg.cerc1();
                         sleep(250);
-                        outg.open();
+                        outg.close();
                         drive.followTrajectory(trajectory2);
                         outg.cerc2();
                         sleep(550);
                         outg.open();
                         drive.followTrajectory(trajectory3);
                         outg.close();
-                        sleep(950);
+                        sleep(750);
                         outg.open();
                         sleep(250);
                         out1.open();
@@ -275,6 +219,12 @@ public class driveAlbastru extends LinearOpMode {
                     else{
                         wob_cleste.close();
                     }
+                    if(gamepad2.a){
+                        plug.down();
+                    }
+                    if(!gamepad2.a){
+                        plug.up();
+                    }
 
 
                     if (gamepad2.dpad_up && !cont){
@@ -290,6 +240,14 @@ public class driveAlbastru extends LinearOpMode {
                     }
                     if (!gamepad2.dpad_down){
                         contor = false;
+                    }
+                    if(gamepad2.dpad_left)
+                    {
+                        HIGH_VELO = 1380;
+                    }
+                    if(gamepad2.dpad_right)
+                    {
+                        HIGH_VELO = 1480;
                     }
 
 
@@ -333,6 +291,7 @@ public class driveAlbastru extends LinearOpMode {
                     }
                     break;
             }
+            telemetry.addData("velocity", outtake.getVelocity());
             telemetry.addData("outtake velocity", HIGH_VELO);
             telemetry.addData("mode", currentMode);
             telemetry.addData("x", poseEstimate.getX());
@@ -342,8 +301,8 @@ public class driveAlbastru extends LinearOpMode {
 
         }
     }
-	
-	void resetPositionCorner()
+
+    void resetPositionCorner()
     {
         drive.setPoseEstimate(new Pose2d(0,0,0));
     }
